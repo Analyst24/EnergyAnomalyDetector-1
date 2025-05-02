@@ -252,17 +252,30 @@ def show_results_page():
         if 'temperature' in results.columns and 'consumption' in results.columns:
             st.markdown("### Temperature vs Consumption Analysis")
             
-            fig = px.scatter(
-                results,
-                x='temperature',
-                y='consumption',
-                color='anomaly',
-                color_discrete_map={0: 'blue', 1: 'red'},
-                title='Temperature vs Consumption with Anomalies Highlighted',
-                template='plotly_dark',
-                trendline='ols',
-                trendline_scope='overall'
-            )
+            # Try to create scatter plot with trendline, but handle case where statsmodels isn't available
+            try:
+                fig = px.scatter(
+                    results,
+                    x='temperature',
+                    y='consumption',
+                    color='anomaly',
+                    color_discrete_map={0: 'blue', 1: 'red'},
+                    title='Temperature vs Consumption with Anomalies Highlighted',
+                    template='plotly_dark',
+                    trendline='ols',
+                    trendline_scope='overall'
+                )
+            except ImportError:
+                # Fallback to basic scatter plot without trendline if statsmodels isn't available
+                fig = px.scatter(
+                    results,
+                    x='temperature',
+                    y='consumption',
+                    color='anomaly',
+                    color_discrete_map={0: 'blue', 1: 'red'},
+                    title='Temperature vs Consumption with Anomalies Highlighted (no trendline)',
+                    template='plotly_dark'
+                )
             
             fig.update_layout(
                 xaxis_title='Temperature',

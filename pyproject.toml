@@ -15,6 +15,7 @@ dependencies = [
     "scikit-learn>=1.6.1",
     "seaborn>=0.13.2",
     "sqlalchemy>=2.0.40",
+    "statsmodels>=0.14.4",
     "streamlit>=1.45.0",
     "tensorflow>=2.14.0",
     "werkzeug>=3.1.3",

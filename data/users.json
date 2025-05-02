@@ -1,12 +1,1 @@
-[
-  {
-    "username": "demo",
-    "email": "demo@example.com",
-    "password": "pbkdf2:sha256:150000$KRdE38vj$4b2a69b9c3e8d53e9dc13f37f2f16bb9a0527efd8aa80a685fd57af7f46302ff"
-  },
-  {
-    "username": "admin",
-    "email": "admin@example.com",
-    "password": "pbkdf2:sha256:150000$tTHdipLJ$19ae9d5a9af4c439d3954a464c03ccea50edbed1acdc6a7a29c3f6a8efba5d3b"
-  }
-]
+[{"username": "demo", "email": "demo@example.com", "password": "pbkdf2:sha256:150000$KRdE38vj$4b2a69b9c3e8d53e9dc13f37f2f16bb9a0527efd8aa80a685fd57af7f46302ff"}, {"username": "admin", "email": "admin@example.com", "password": "pbkdf2:sha256:150000$tTHdipLJ$19ae9d5a9af4c439d3954a464c03ccea50edbed1acdc6a7a29c3f6a8efba5d3b"}, {"username": "Opulent", "email": "opulentmagomo@gmail.com", "password": "scrypt:32768:8:1$xazqidhH0CGi6laa$19a8fb3e8bd3912e70367f025fbe5b2d1c326f788ad906b739fdda3fc8cc231f25d9c669efa1fd3bba99d342f2c9e3f55c2352edb786bef0aefb0b12e634e2d5"}]
