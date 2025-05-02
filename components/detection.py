@@ -146,10 +146,19 @@ def show_detection_page():
             status_text.text("Processing data with the selected model...")
             
             # Make API request
-            response = requests.post(
-                'http://localhost:8000/api/detect',
-                json=payload
-            )
+            try:
+                response = requests.post(
+                    'http://localhost:8000/api/detect_anomalies',  # Correct endpoint
+                    json=payload,
+                    timeout=2  # Add timeout for faster fallback
+                )
+            except:
+                # Try alternative endpoint
+                response = requests.post(
+                    'http://localhost:8000/api/detect',
+                    json=payload,
+                    timeout=2  # Add timeout for faster fallback
+                )
             
             if response.status_code == 200:
                 # Process successful response
@@ -225,13 +234,42 @@ def show_detection_page():
             progress_bar.progress(95)
             status_text.text("Finalizing results...")
             
-            # Generate mock metrics
+            # Generate mock metrics including evaluation metrics
+            # In the mock scenario, generate synthetic ground truth for evaluation
+            ground_truth = np.zeros(len(results_df))
+            
+            # Mark some data points as true anomalies (slightly different from detected anomalies for realism)
+            true_anomaly_count = int(len(results_df) * np.random.uniform(0.07, 0.12))
+            true_anomaly_indices = np.random.choice(len(results_df), size=true_anomaly_count, replace=False)
+            ground_truth[true_anomaly_indices] = 1
+            
+            # Calculate evaluation metrics
+            true_positives = np.sum((results_df['anomaly'] == 1) & (ground_truth == 1))
+            false_positives = np.sum((results_df['anomaly'] == 1) & (ground_truth == 0))
+            true_negatives = np.sum((results_df['anomaly'] == 0) & (ground_truth == 0))
+            false_negatives = np.sum((results_df['anomaly'] == 0) & (ground_truth == 1))
+            
+            # Calculate derived metrics (handle zero division)
+            accuracy = (true_positives + true_negatives) / len(results_df) if len(results_df) > 0 else 0
+            precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0
+            recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
+            f1_score = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+            
             metrics = {
                 'model_name': model_options[selected_model],
                 'anomaly_count': int(anomaly_count),
                 'total_records': len(results_df),
                 'anomaly_percent': float((anomaly_count / len(results_df)) * 100),
-                'threshold_used': float(threshold)
+                'threshold_used': float(threshold),
+                # Add evaluation metrics
+                'accuracy': float(accuracy),
+                'precision': float(precision),
+                'recall': float(recall),
+                'f1_score': float(f1_score),
+                'true_positives': int(true_positives),
+                'false_positives': int(false_positives),
+                'true_negatives': int(true_negatives),
+                'false_negatives': int(false_negatives)
             }
             
             # Store results in session state
