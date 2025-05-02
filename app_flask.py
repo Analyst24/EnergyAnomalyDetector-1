@@ -75,8 +75,32 @@ def save_users(users):
 def run_streamlit():
     """Run the Streamlit application in a separate process."""
     print("Starting Streamlit application...")
+    
+    # Ensure .streamlit directory exists with proper config
+    os.makedirs('.streamlit', exist_ok=True)
+    
+    # Create or update config.toml
+    with open('.streamlit/config.toml', 'w') as f:
+        f.write("""[server]
+headless = true
+enableCORS = false
+address = "0.0.0.0"
+port = 5000
+enableXsrfProtection = false
+
+[browser]
+serverAddress = "localhost"
+
+[theme]
+primaryColor = "#4CAF50"
+backgroundColor = "#0e1117"
+secondaryBackgroundColor = "#1a1a1a"
+textColor = "#FFFFFF"
+""")
+    
+    # Start Streamlit process using config file
     streamlit_process = subprocess.Popen(
-        ["streamlit", "run", "app.py", "--server.port", "5000", "--server.address", "0.0.0.0"],
+        ["streamlit", "run", "app.py"],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
@@ -277,7 +301,9 @@ def detect_anomalies():
 @app.route('/')
 def index():
     """Main route redirects to Streamlit frontend."""
-    return redirect('http://localhost:5000')
+    # Redirect to same host but port 5000 - works in any environment
+    host = request.host.split(':')[0]  # Get just the hostname without port
+    return redirect(f'http://{host}:5000')
 
 if __name__ == '__main__':
     # Ensure data directories exist
