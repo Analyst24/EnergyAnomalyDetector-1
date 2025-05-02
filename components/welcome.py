@@ -134,7 +134,7 @@ def show_welcome_page():
             value=23,
             title={"text": "Avg. Energy Savings Potential"},
             gauge={
-                "axis": {"range": [0, 50], "suffix": "%"},
+                "axis": {"range": [0, 50], "ticksuffix": "%"},
                 "bar": {"color": "green"},
                 "steps": [
                     {"range": [0, 10], "color": "lightgray"},
