@@ -5,6 +5,21 @@ import requests
 import pandas as pd
 from PIL import Image
 
+# Initialize database if available
+try:
+    from database.connection import init_db
+    from database.migration import migrate_from_file_to_db
+    
+    # Initialize database when app starts
+    init_db()
+    
+    # Set database flag for session state
+    if 'db_initialized' not in st.session_state:
+        st.session_state.db_initialized = True
+        print("Database initialized successfully")
+except ImportError:
+    print("Database modules not available, running without database support")
+
 # Import components
 from components.authentication import login_page, signup_page, is_authenticated, logout
 from components.welcome import show_welcome_page

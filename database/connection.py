@@ -29,7 +29,8 @@ def test_connection():
     """Test database connection and return status."""
     try:
         # Attempt a simple query to test connection
-        engine.execute("SELECT 1")
+        with engine.connect() as conn:
+            conn.execute("SELECT 1")
         return {"status": "connected", "message": "Successfully connected to the database"}
     except Exception as e:
         return {"status": "error", "message": f"Failed to connect to database: {str(e)}"}

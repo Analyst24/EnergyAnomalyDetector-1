@@ -4,10 +4,20 @@ import os
 import requests
 from werkzeug.security import generate_password_hash, check_password_hash
 
-# File path for storing user data
+# Import database operations
+try:
+    from database.models import User
+    from database.operations import authenticate_user, create_user, get_user_by_username, get_user_by_email
+    from database.connection import db_session
+    DATABASE_AVAILABLE = True
+except ImportError:
+    DATABASE_AVAILABLE = False
+    print("Database modules not available, falling back to file-based authentication")
+
+# File path for storing user data (used as fallback)
 USERS_FILE = 'data/users.json'
 
-# Ensure users file exists
+# Ensure users file exists (for fallback)
 def ensure_users_file():
     if not os.path.exists(os.path.dirname(USERS_FILE)):
         os.makedirs(os.path.dirname(USERS_FILE))
@@ -16,8 +26,24 @@ def ensure_users_file():
         with open(USERS_FILE, 'w') as f:
             json.dump([], f)
 
-# Get users from file
+# Get users from file (fallback method)
 def get_users():
+    # Try to use database if available
+    if DATABASE_AVAILABLE:
+        try:
+            users = User.query.all()
+            return [
+                {
+                    'username': user.username,
+                    'email': user.email,
+                    'password': user.password_hash
+                }
+                for user in users
+            ]
+        except Exception as e:
+            print(f"Error accessing database: {str(e)}")
+    
+    # Fallback to file
     ensure_users_file()
     try:
         with open(USERS_FILE, 'r') as f:
@@ -25,8 +51,37 @@ def get_users():
     except:
         return []
 
-# Save users to file
+# Save users to file (fallback method)
 def save_users(users):
+    # Try to use database if available
+    if DATABASE_AVAILABLE:
+        try:
+            # For each user in the list
+            for user_data in users:
+                username = user_data.get('username')
+                email = user_data.get('email')
+                password_hash = user_data.get('password')
+                
+                # Check if user already exists
+                existing_user = User.query.filter_by(username=username).first()
+                if existing_user:
+                    continue
+                
+                # Create new user
+                user = User(
+                    username=username,
+                    email=email,
+                    password_hash=password_hash
+                )
+                db_session.add(user)
+            
+            # Commit changes
+            db_session.commit()
+            return
+        except Exception as e:
+            print(f"Error saving to database: {str(e)}")
+    
+    # Fallback to file
     ensure_users_file()
     with open(USERS_FILE, 'w') as f:
         json.dump(users, f)
@@ -77,7 +132,22 @@ def login_page():
                 st.error("Please enter both username and password")
                 st.stop()
             
-            # Attempt login locally first
+            # Attempt database login first if available
+            if DATABASE_AVAILABLE:
+                try:
+                    user = authenticate_user(username, password)
+                    if user:
+                        st.session_state.authenticated = True
+                        st.session_state.username = username
+                        st.session_state.user_id = user.id
+                        st.session_state.current_page = "home"
+                        st.success("Login successful!")
+                        st.rerun()
+                        return
+                except Exception as e:
+                    print(f"Error during database authentication: {str(e)}")
+            
+            # Fallback to file-based authentication
             users = get_users()
             
             for user in users:
@@ -169,7 +239,30 @@ def signup_page():
                     st.error("Email already exists")
                     st.stop()
             
-            # Try to connect to backend API first
+            # Try database registration first if available
+            if DATABASE_AVAILABLE:
+                try:
+                    # Check if username or email already exists
+                    if get_user_by_username(username):
+                        st.error("Username already exists")
+                        st.stop()
+                    
+                    if get_user_by_email(email):
+                        st.error("Email already exists") 
+                        st.stop()
+                    
+                    # Create user in database
+                    new_user = create_user(username, email, password)
+                    if new_user:
+                        st.success("Account created successfully! Please log in.")
+                        st.session_state.current_page = "login"
+                        st.rerun()
+                        return
+                except Exception as e:
+                    print(f"Error during database registration: {str(e)}")
+                    # Fall through to file-based or API registration
+            
+            # Try to connect to backend API next
             try:
                 response = requests.post(
                     'http://localhost:8000/api/signup',
