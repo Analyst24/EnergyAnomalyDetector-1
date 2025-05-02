@@ -178,7 +178,8 @@ def login_page():
             try:
                 response = requests.post(
                     'http://localhost:8000/api/login',
-                    json={'username': username, 'password': password}
+                    json={'username': username, 'password': password},
+                    timeout=1  # Short timeout to quickly fall back if API not available
                 )
                 
                 if response.status_code == 200:
@@ -189,8 +190,10 @@ def login_page():
                     st.rerun()
                 else:
                     st.error("Invalid username or password")
-            except:
+            except Exception as e:
                 # Fallback to local check if API is not available
+                # API error is expected in offline mode, so don't show error to user
+                print(f"API connection failed (this is normal in offline mode): {str(e)}")
                 st.error("Invalid username or password")
         
         st.markdown('</div>', unsafe_allow_html=True)
@@ -281,7 +284,8 @@ def signup_page():
             try:
                 response = requests.post(
                     'http://localhost:8000/api/signup',
-                    json={'username': username, 'email': email, 'password': password}
+                    json={'username': username, 'email': email, 'password': password},
+                    timeout=1  # Short timeout to quickly fall back if API not available
                 )
                 
                 if response.status_code == 201:
@@ -291,7 +295,8 @@ def signup_page():
                 else:
                     error_data = response.json()
                     st.error(f"Error: {error_data.get('message', 'Unknown error')}")
-            except:
+            except Exception as e:
+                print(f"API connection failed (this is normal in offline mode): {str(e)}")
                 # Fallback to local registration if API is not available
                 # Add new user to users list
                 users.append({
