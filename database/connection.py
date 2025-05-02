@@ -30,7 +30,9 @@ def test_connection():
     try:
         # Attempt a simple query to test connection
         with engine.connect() as conn:
-            conn.execute("SELECT 1")
+            from sqlalchemy import text
+            conn.execute(text("SELECT 1"))
+            conn.commit()
         return {"status": "connected", "message": "Successfully connected to the database"}
     except Exception as e:
         return {"status": "error", "message": f"Failed to connect to database: {str(e)}"}

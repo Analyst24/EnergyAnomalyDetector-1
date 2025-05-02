@@ -20,14 +20,22 @@ except ImportError:
 
 def main():
     """Initialize database and perform migrations."""
+    if not DATABASE_AVAILABLE:
+        print("❌ Database modules not available, skipping initialization")
+        return
+        
     print("🔄 Testing database connection...")
-    connection_status = test_connection()
-    
-    if connection_status["status"] != "connected":
-        print(f"❌ Database connection failed: {connection_status['message']}")
-        sys.exit(1)
-    
-    print("✅ Database connection successful")
+    try:
+        connection_status = test_connection()
+        
+        if connection_status["status"] != "connected":
+            print(f"❌ Database connection failed: {connection_status['message']}")
+            print("⚠️ Continuing without database connection verification")
+        else:
+            print("✅ Database connection successful")
+    except Exception as e:
+        print(f"❌ Error testing database connection: {str(e)}")
+        print("⚠️ Continuing without database connection verification")
     
     # Initialize database tables
     print("🔄 Creating database tables...")
