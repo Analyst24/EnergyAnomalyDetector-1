@@ -82,19 +82,13 @@ def main():
     
     # Show login/signup if not authenticated
     elif not st.session_state.authenticated:
-        col1, col2 = st.columns([1, 1])
+        # Display authentication options with tabs
+        auth_tab1, auth_tab2 = st.tabs(["Login", "Sign Up"])
         
-        with col1:
-            if st.button("Login", key="login_tab"):
-                st.session_state.current_page = "login"
-        
-        with col2:
-            if st.button("Sign Up", key="signup_tab"):
-                st.session_state.current_page = "signup"
-        
-        if st.session_state.current_page == "login":
+        with auth_tab1:
             login_page()
-        elif st.session_state.current_page == "signup":
+            
+        with auth_tab2:
             signup_page()
     
     # Show main interface if authenticated

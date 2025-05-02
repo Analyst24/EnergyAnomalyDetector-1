@@ -37,15 +37,18 @@ def is_authenticated():
 
 # Login page UI
 def login_page():
-    st.title("Login")
+    st.header("Login to Your Account")
     
-    # Set a background image
+    # Login form container with better styling
     st.markdown(
         """
         <style>
-        .stApp {
-            background-image: url("https://img.freepik.com/free-vector/gradient-network-connection-background_23-2148865392.jpg");
-            background-size: cover;
+        .login-form-container {
+            background-color: rgba(30, 33, 48, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         </style>
         """,
@@ -54,21 +57,12 @@ def login_page():
     
     # Create a card-like container for login form
     with st.container():
-        st.markdown(
-            """
-            <style>
-            .login-container {
-                background-color: rgba(25, 25, 25, 0.8);
-                padding: 20px;
-                border-radius: 10px;
-                margin: 20px 0;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
+        # Create a column layout for better form appearance
+        form_col1, form_col2, form_col3 = st.columns([1, 3, 1])
         
-        st.markdown('<div class="login-container">', unsafe_allow_html=True)
+        with form_col2:
+            # Add form container with nice styling
+            st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
         
         username = st.text_input("Username", key="login_username")
         password = st.text_input("Password", type="password", key="login_password")
@@ -115,15 +109,18 @@ def login_page():
 
 # Sign up page UI
 def signup_page():
-    st.title("Sign Up")
+    st.header("Create a New Account")
     
-    # Set a background image
+    # Signup form container with better styling
     st.markdown(
         """
         <style>
-        .stApp {
-            background-image: url("https://img.freepik.com/free-vector/gradient-network-connection-background_23-2148865392.jpg");
-            background-size: cover;
+        .signup-form-container {
+            background-color: rgba(30, 33, 48, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         </style>
         """,

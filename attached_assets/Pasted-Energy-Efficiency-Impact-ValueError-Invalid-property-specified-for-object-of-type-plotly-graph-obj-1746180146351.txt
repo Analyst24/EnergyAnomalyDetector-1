@@ -1,0 +1,29 @@
+Energy Efficiency Impact
+ValueError: Invalid property specified for object of type plotly.graph_objs.indicator.Gauge: 'suffix' Did you mean "axis"? Valid properties: axis :class:`plotly.graph_objects.indicator.gauge.Axis` instance or dict with compatible properties bar Set the appearance of the gauge's value bgcolor Sets the gauge background color. bordercolor Sets the color of the border enclosing the gauge. borderwidth Sets the width (in px) of the border enclosing the gauge. shape Set the shape of the gauge steps A tuple of :class:`plotly.graph_objects.indicator.gauge.Step` instances or dicts with compatible properties stepdefaults When used in a template (as layout.template.data.indicator.gauge.stepdefaults), sets the default property values to use for elements of indicator.gauge.steps threshold :class:`plotly.graph_objects.indicator.gauge.Threshold` instance or dict with compatible properties Did you mean "axis"? Bad property path: suffix ^^^^^^
+Traceback:
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 121, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 648, in code_to_exec
+    exec(code, module.__dict__)
+File "/home/runner/workspace/app.py", line 165, in <module>
+    main()
+File "/home/runner/workspace/app.py", line 78, in main
+    show_welcome_page()
+File "/home/runner/workspace/components/welcome.py", line 132, in show_welcome_page
+    go.Indicator(
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/plotly/graph_objs/_indicator.py", line 1026, in __init__
+    self["gauge"] = _v
+    ~~~~^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/plotly/basedatatypes.py", line 4852, in __setitem__
+    self._set_compound_prop(prop, value)
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/plotly/basedatatypes.py", line 5263, in _set_compound_prop
+    val = validator.validate_coerce(val, skip_invalid=self._skip_invalid)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/_plotly_utils/basevalidators.py", line 2504, in validate_coerce
+    v = self.data_class(v, skip_invalid=skip_invalid, _validate=_validate)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/plotly/graph_objs/indicator/_gauge.py", line 692, in __init__
+    self._process_kwargs(**dict(arg, **kwargs))
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/plotly/basedatatypes.py", line 4378, in _process_kwargs
+    raise err
