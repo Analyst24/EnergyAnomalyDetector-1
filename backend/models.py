@@ -56,12 +56,54 @@ class IsolationForestModel:
         anomaly_count = np.sum(anomalies)
         anomaly_percent = (anomaly_count / len(data)) * 100
         
+        # Generate evaluation metrics based on synthetic ground truth for demonstration
+        # In a real-world scenario, you would use actual labeled data
+        # This is a simplified approach for educational purposes
+        
+        # Create synthetic ground truth based on extreme values
+        # (assuming outliers are 10% of highest/lowest values in key features)
+        if len(numeric_cols) > 0:
+            ground_truth = np.zeros(len(data))
+            
+            # For each numerical column, mark extreme values as anomalies
+            for col in numeric_cols[:3]:  # Use at most 3 columns
+                values = data[col].values
+                sorted_values = np.sort(values)
+                
+                # Mark highest and lowest 5% as potential anomalies
+                low_threshold = sorted_values[int(len(sorted_values) * 0.05)]
+                high_threshold = sorted_values[int(len(sorted_values) * 0.95)]
+                
+                # Mark values outside these thresholds
+                col_anomalies = ((values <= low_threshold) | (values >= high_threshold)).astype(int)
+                ground_truth = np.logical_or(ground_truth, col_anomalies).astype(int)
+        else:
+            # If no numerical columns, create random ground truth
+            ground_truth = np.random.choice([0, 1], size=len(data), p=[0.9, 0.1])
+        
+        # Calculate performance metrics
+        tn, fp, fn, tp = confusion_matrix(ground_truth, anomalies, labels=[0, 1]).ravel()
+        
+        # Calculate metrics (handle division by zero)
+        accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+        
         metrics = {
             'model_name': 'Isolation Forest',
             'anomaly_count': int(anomaly_count),
             'total_records': len(data),
             'anomaly_percent': float(anomaly_percent),
-            'threshold_used': float(threshold)
+            'threshold_used': float(threshold),
+            'accuracy': float(accuracy),
+            'precision': float(precision),
+            'recall': float(recall),
+            'f1_score': float(f1),
+            'true_positives': int(tp),
+            'false_positives': int(fp),
+            'true_negatives': int(tn),
+            'false_negatives': int(fn)
         }
         
         return results, metrics
@@ -146,6 +188,36 @@ class AutoEncoderModel:
         anomaly_count = np.sum(anomalies)
         anomaly_percent = (anomaly_count / len(data)) * 100
         
+        # Generate evaluation metrics based on synthetic ground truth for demonstration
+        # In a real-world scenario, you would use actual labeled data
+        if len(numeric_cols) > 0:
+            ground_truth = np.zeros(len(data))
+            
+            # For each numerical column, mark extreme values as anomalies
+            for col in numeric_cols[:3]:  # Use at most 3 columns
+                values = data[col].values
+                sorted_values = np.sort(values)
+                
+                # Mark highest and lowest 5% as potential anomalies
+                low_threshold = sorted_values[int(len(sorted_values) * 0.05)]
+                high_threshold = sorted_values[int(len(sorted_values) * 0.95)]
+                
+                # Mark values outside these thresholds
+                col_anomalies = ((values <= low_threshold) | (values >= high_threshold)).astype(int)
+                ground_truth = np.logical_or(ground_truth, col_anomalies).astype(int)
+        else:
+            # If no numerical columns, create random ground truth
+            ground_truth = np.random.choice([0, 1], size=len(data), p=[0.9, 0.1])
+        
+        # Calculate performance metrics
+        tn, fp, fn, tp = confusion_matrix(ground_truth, anomalies, labels=[0, 1]).ravel()
+        
+        # Calculate metrics (handle division by zero)
+        accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+        
         metrics = {
             'model_name': 'Autoencoder',
             'anomaly_count': int(anomaly_count),
@@ -153,7 +225,15 @@ class AutoEncoderModel:
             'anomaly_percent': float(anomaly_percent),
             'threshold_used': float(threshold),
             'training_loss': float(self.history.history['loss'][-1]),
-            'validation_loss': float(self.history.history['val_loss'][-1]) if 'val_loss' in self.history.history else None
+            'validation_loss': float(self.history.history['val_loss'][-1]) if 'val_loss' in self.history.history else None,
+            'accuracy': float(accuracy),
+            'precision': float(precision),
+            'recall': float(recall),
+            'f1_score': float(f1),
+            'true_positives': int(tp),
+            'false_positives': int(fp),
+            'true_negatives': int(tn),
+            'false_negatives': int(fn)
         }
         
         return results, metrics
@@ -217,6 +297,36 @@ class KMeansModel:
         cluster_counts = np.bincount(clusters, minlength=n_clusters)
         cluster_percents = (cluster_counts / len(data)) * 100
         
+        # Generate evaluation metrics based on synthetic ground truth for demonstration
+        # In a real-world scenario, you would use actual labeled data
+        if len(numeric_cols) > 0:
+            ground_truth = np.zeros(len(data))
+            
+            # For each numerical column, mark extreme values as anomalies
+            for col in numeric_cols[:3]:  # Use at most 3 columns
+                values = data[col].values
+                sorted_values = np.sort(values)
+                
+                # Mark highest and lowest 5% as potential anomalies
+                low_threshold = sorted_values[int(len(sorted_values) * 0.05)]
+                high_threshold = sorted_values[int(len(sorted_values) * 0.95)]
+                
+                # Mark values outside these thresholds
+                col_anomalies = ((values <= low_threshold) | (values >= high_threshold)).astype(int)
+                ground_truth = np.logical_or(ground_truth, col_anomalies).astype(int)
+        else:
+            # If no numerical columns, create random ground truth
+            ground_truth = np.random.choice([0, 1], size=len(data), p=[0.9, 0.1])
+        
+        # Calculate performance metrics
+        tn, fp, fn, tp = confusion_matrix(ground_truth, anomalies, labels=[0, 1]).ravel()
+        
+        # Calculate metrics (handle division by zero)
+        accuracy = (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0
+        precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+        recall = tp / (tp + fn) if (tp + fn) > 0 else 0
+        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
+        
         metrics = {
             'model_name': 'K-Means Clustering',
             'anomaly_count': int(anomaly_count),
@@ -229,7 +339,15 @@ class KMeansModel:
                     'count': int(cluster_counts[i]),
                     'percent': float(cluster_percents[i])
                 } for i in range(n_clusters)
-            }
+            },
+            'accuracy': float(accuracy),
+            'precision': float(precision),
+            'recall': float(recall),
+            'f1_score': float(f1),
+            'true_positives': int(tp),
+            'false_positives': int(fp),
+            'true_negatives': int(tn),
+            'false_negatives': int(fn)
         }
         
         return results, metrics

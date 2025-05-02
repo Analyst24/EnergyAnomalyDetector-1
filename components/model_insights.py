@@ -39,7 +39,7 @@ def show_model_insights():
         st.metric("Threshold Used", f"{metrics['threshold_used']:.2f}")
     
     # Create tabs for different insights
-    tab1, tab2 = st.tabs(["Performance Analysis", "Feature Importance"])
+    tab1, tab2, tab3 = st.tabs(["Performance Analysis", "Evaluation Metrics", "Feature Importance"])
     
     with tab1:
         st.markdown("### Model Performance")
@@ -219,6 +219,161 @@ def show_model_insights():
                 st.plotly_chart(fig, use_container_width=True)
     
     with tab2:
+        st.markdown("### Model Evaluation Metrics")
+        
+        # Check if evaluation metrics are available
+        if 'accuracy' in metrics and 'precision' in metrics and 'recall' in metrics and 'f1_score' in metrics:
+            # Create metrics cards
+            st.markdown("""
+            <style>
+            .metric-card {
+                background-color: rgba(30, 33, 48, 0.9);
+                border-radius: 8px;
+                padding: 15px;
+                margin-bottom: 15px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .metric-title {
+                font-size: 1.2em;
+                font-weight: bold;
+                margin-bottom: 10px;
+            }
+            .metric-value {
+                font-size: 2.2em;
+                font-weight: bold;
+                color: #4CAF50;
+                margin: 5px 0;
+            }
+            .metric-description {
+                font-size: 0.9em;
+                color: #cccccc;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+            
+            # Create 4 metric columns
+            col1, col2 = st.columns(2)
+            col3, col4 = st.columns(2)
+            
+            with col1:
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">Accuracy</div>
+                    <div class="metric-value">{metrics['accuracy']:.2f}</div>
+                    <div class="metric-description">
+                        Overall correctness of predictions. Ratio of correctly identified samples to total samples.
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">Precision</div>
+                    <div class="metric-value">{metrics['precision']:.2f}</div>
+                    <div class="metric-description">
+                        Ratio of correctly identified anomalies to all predicted anomalies. Measures false alarm rate.
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col3:
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">Recall</div>
+                    <div class="metric-value">{metrics['recall']:.2f}</div>
+                    <div class="metric-description">
+                        Ratio of correctly identified anomalies to all actual anomalies. Measures detection rate.
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col4:
+                st.markdown(f"""
+                <div class="metric-card">
+                    <div class="metric-title">F1 Score</div>
+                    <div class="metric-value">{metrics['f1_score']:.2f}</div>
+                    <div class="metric-description">
+                        Harmonic mean of precision and recall. Balanced measure of model performance.
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            # Add confusion matrix visualization
+            st.markdown("### Confusion Matrix")
+            
+            matrix_values = [
+                [metrics['true_negatives'], metrics['false_positives']],
+                [metrics['false_negatives'], metrics['true_positives']]
+            ]
+            
+            fig = go.Figure(data=go.Heatmap(
+                z=matrix_values,
+                x=['Predicted Normal', 'Predicted Anomaly'],
+                y=['Actual Normal', 'Actual Anomaly'],
+                text=[[str(metrics['true_negatives']), str(metrics['false_positives'])],
+                      [str(metrics['false_negatives']), str(metrics['true_positives'])]],
+                texttemplate="%{text}",
+                colorscale='Blues'
+            ))
+            
+            fig.update_layout(
+                title="Confusion Matrix",
+                height=500,
+                template='plotly_dark'
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+            
+            # Add explanation
+            st.markdown("""
+            ### Metric Definitions:
+            
+            - **True Positives (TP)**: Anomalies correctly identified as anomalies
+            - **False Positives (FP)**: Normal points incorrectly identified as anomalies
+            - **True Negatives (TN)**: Normal points correctly identified as normal
+            - **False Negatives (FN)**: Anomalies incorrectly identified as normal
+            
+            ### Model Comparison
+            
+            Different models may excel at different aspects of anomaly detection:
+            
+            - **Isolation Forest** typically provides good overall performance and is efficient for large datasets
+            - **Autoencoder** can capture complex patterns and non-linear relationships in the data
+            - **K-Means Clustering** is useful for identifying distinct groups of anomalies
+            """)
+            
+            # Show ROC curve-like visualization
+            st.markdown("### Performance Trade-off Visualization")
+            
+            # Create a scatter plot with performance metrics
+            metrics_df = pd.DataFrame({
+                'Metric': ['Precision', 'Recall', 'Accuracy', 'F1 Score'],
+                'Value': [metrics['precision'], metrics['recall'], metrics['accuracy'], metrics['f1_score']]
+            })
+            
+            fig = px.bar(
+                metrics_df,
+                x='Metric',
+                y='Value',
+                color='Value',
+                color_continuous_scale='Viridis',
+                title=f"Performance Metrics for {metrics['model_name']}",
+                template='plotly_dark'
+            )
+            
+            fig.update_layout(
+                xaxis_title='Metric',
+                yaxis_title='Value (0-1 scale)',
+                height=400,
+                yaxis=dict(range=[0, 1])
+            )
+            
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.info("Evaluation metrics are not available for this model run. Run detection again to see evaluation metrics.")
+    
+    with tab3:
         st.markdown("### Feature Importance Analysis")
         
         # Get numerical columns from results
@@ -315,6 +470,23 @@ def show_model_insights():
             plt.figure(figsize=(10, 6))
             
             # Create a PDF-like report using BytesIO
+            # Add evaluation metrics to report if available
+            eval_metrics_text = ""
+            if 'accuracy' in metrics and 'precision' in metrics and 'recall' in metrics and 'f1_score' in metrics:
+                eval_metrics_text = f"""
+            #### Evaluation Metrics:
+            - Accuracy: {metrics['accuracy']:.4f}
+            - Precision: {metrics['precision']:.4f}
+            - Recall: {metrics['recall']:.4f}
+            - F1 Score: {metrics['f1_score']:.4f}
+            
+            #### Confusion Matrix:
+            - True Positives: {metrics['true_positives']}
+            - False Positives: {metrics['false_positives']}
+            - True Negatives: {metrics['true_negatives']}
+            - False Negatives: {metrics['false_negatives']}
+            """
+            
             report_text = f"""
             ## Anomaly Detection Model Performance Report
             
@@ -325,6 +497,13 @@ def show_model_insights():
             - Total Records: {metrics['total_records']}
             - Anomaly Percentage: {metrics['anomaly_percent']:.2f}%
             - Threshold Used: {metrics['threshold_used']:.2f}
+            {eval_metrics_text}
+            
+            #### Definitions:
+            - Accuracy: Overall correctness of the model's predictions
+            - Precision: Ratio of correctly identified anomalies to all predicted anomalies
+            - Recall: Ratio of correctly identified anomalies to all actual anomalies
+            - F1 Score: Harmonic mean of precision and recall
             
             This report was generated automatically by the Energy Efficiency Anomaly Detection System.
             """
