@@ -56,21 +56,26 @@ def login_page():
     )
     
     # Create a card-like container for login form
-    with st.container():
-        # Create a column layout for better form appearance
-        form_col1, form_col2, form_col3 = st.columns([1, 3, 1])
+    form_col1, form_col2, form_col3 = st.columns([1, 3, 1])
         
-        with form_col2:
-            # Add form container with nice styling
-            st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
+    with form_col2:
+        # Add form container with nice styling
+        st.markdown('<div class="login-form-container">', unsafe_allow_html=True)
         
         username = st.text_input("Username", key="login_username")
         password = st.text_input("Password", type="password", key="login_password")
         
-        if st.button("Login", key="login_button"):
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.markdown('<p style="color: #8a8a8a; font-size: 0.8rem;">Use demo/demo to login</p>', unsafe_allow_html=True)
+            
+        with col2:
+            login_button = st.button("Login", key="login_button", use_container_width=True)
+        
+        if login_button:
             if not username or not password:
                 st.error("Please enter both username and password")
-                return
+                st.stop()
             
             # Attempt login locally first
             users = get_users()
@@ -101,11 +106,9 @@ def login_page():
                     st.error("Invalid username or password")
             except:
                 # Fallback to local check if API is not available
-                st.error("Could not connect to authentication service. Invalid username or password.")
+                st.error("Invalid username or password")
         
         st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown("Don't have an account? Sign up!")
 
 # Sign up page UI
 def signup_page():
@@ -128,41 +131,32 @@ def signup_page():
     )
     
     # Create a card-like container for signup form
-    with st.container():
-        st.markdown(
-            """
-            <style>
-            .signup-container {
-                background-color: rgba(25, 25, 25, 0.8);
-                padding: 20px;
-                border-radius: 10px;
-                margin: 20px 0;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True
-        )
-        
-        st.markdown('<div class="signup-container">', unsafe_allow_html=True)
+    form_col1, form_col2, form_col3 = st.columns([1, 3, 1])
+    
+    with form_col2:
+        # Add form container with nice styling
+        st.markdown('<div class="signup-form-container">', unsafe_allow_html=True)
         
         username = st.text_input("Username", key="signup_username")
         email = st.text_input("Email", key="signup_email")
         password = st.text_input("Password", type="password", key="signup_password")
         confirm_password = st.text_input("Confirm Password", type="password", key="signup_confirm_password")
         
-        if st.button("Sign Up", key="signup_button"):
+        signup_button = st.button("Create Account", key="signup_button", use_container_width=True)
+        
+        if signup_button:
             if not username or not email or not password:
                 st.error("Please fill in all fields")
-                return
+                st.stop()
             
             if password != confirm_password:
                 st.error("Passwords do not match")
-                return
+                st.stop()
             
             # Validate email format
             if '@' not in email or '.' not in email:
                 st.error("Please enter a valid email address")
-                return
+                st.stop()
             
             # Check if username or email already exists
             users = get_users()
@@ -170,10 +164,10 @@ def signup_page():
             for user in users:
                 if user['username'] == username:
                     st.error("Username already exists")
-                    return
+                    st.stop()
                 if user.get('email') == email:
                     st.error("Email already exists")
-                    return
+                    st.stop()
             
             # Try to connect to backend API first
             try:
@@ -206,8 +200,6 @@ def signup_page():
                 st.rerun()
         
         st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown("Already have an account? Log in!")
 
 # Logout function
 def logout():
